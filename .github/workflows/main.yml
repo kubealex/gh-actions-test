@@ -9,6 +9,18 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: |
+          name/app
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          
     - name: Build Image
       id: build-image
       uses: redhat-actions/buildah-build@v2
@@ -32,3 +44,11 @@ jobs:
 
     - name: Print image url
       run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
+
+
+    - name: Print tags url
+      run: echo "TAGS - ${{ steps.meta.outputs.tags }}"
+      
+    - name: Print tags url
+      run: echo "TAGS - ${{ steps.meta.outputs.labels }}"
+      
