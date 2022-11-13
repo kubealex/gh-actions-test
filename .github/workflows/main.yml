@@ -20,12 +20,13 @@ jobs:
       uses: docker/metadata-action@v4
       with:
         images: |
-          name/app
+          quay.io/kubealex/my-app
         tags: |
           type=ref,event=branch
-          type=ref,event=pr
           type=semver,pattern={{version}}
           type=semver,pattern={{major}}.{{minor}}
+        flavor: |
+          latest=true
           
     - name: Build Image
       id: build-image
