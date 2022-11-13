@@ -25,6 +25,7 @@ jobs:
     name: Build container images
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Build Image - x86_64
         id: build-image-x86_64
         uses: redhat-actions/buildah-build@v2
