@@ -33,7 +33,7 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           image: my-app
-          tags: ${{ needs.versioning.outputs.release_tag }}
+          tags: latest ${{ needs.versioning.outputs.release_tag }}
           containerfiles: |
             ./Dockerfile
 
@@ -42,7 +42,7 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           image: my-app
-          tags: ${{ needs.versioning.outputs.release_tag }}-arm64
+          tags: latest-arm64 ${{ needs.versioning.outputs.release_tag }}-arm64
           containerfiles: |
             ./Dockerfile-arm64
           
@@ -51,7 +51,7 @@ jobs:
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ steps.build-image-x86_64.outputs.image }}
-          tags: ${{ needs.versioning.outputs.release_tag }}
+          tags: latest ${{ needs.versioning.outputs.release_tag }}
           registry: quay.io/kubealex
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_TOKEN }}
@@ -61,7 +61,7 @@ jobs:
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ steps.build-image-arm64.outputs.image }}
-          tags: ${{ needs.versioning.outputs.release_tag }}-arm64
+          tags: latest-arm64 ${{ needs.versioning.outputs.release_tag }}-arm64
           registry: quay.io/kubealex
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_TOKEN }}
