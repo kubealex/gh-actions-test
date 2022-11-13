@@ -1,8 +1,7 @@
 name: Lint and validate Helm chart
 on:
   pull_request:
-    types:
-      - opened
+    types: [opened, reopened]
       
 jobs:
   build:
@@ -17,4 +16,4 @@ jobs:
         id: install
        
       - name: Test helm
-        run: helm version
+        run: helm template k8s-mediaserver
