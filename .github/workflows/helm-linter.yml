@@ -7,13 +7,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v3
       
       - name: Setup helm 
         uses: azure/setup-helm@v3
         with:
            version: 'v3.10.0' 
-        id: install
+        id: install-helm
        
       - name: Test helm
         run: helm template k8s-mediaserver
