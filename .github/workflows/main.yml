@@ -32,7 +32,7 @@ jobs:
       uses: redhat-actions/buildah-build@v2
       with:
         image: my-app
-        tags: latest ${{ github.sha }}
+        tags: latest ${{ steps.build-image.outputs.tags }}
         containerfiles: |
           ./Dockerfile
 
@@ -54,7 +54,5 @@ jobs:
 
     - name: Print tags url
       run: echo "TAGS - ${{ steps.meta.outputs.tags }}"
-      
-    - name: Print tags url
-      run: echo "TAGS - ${{ steps.meta.outputs.labels }}"
+
       
