@@ -14,28 +14,17 @@ jobs:
 
     - name: Bump version and push tag
       uses: mathieudutour/github-tag-action@v6.1
+      id: bump-version
       with:
         github_token: ${{ secrets.GH_TOKEN }}
         default_bump: false     
-        
-    - name: Docker meta
-      id: meta
-      uses: docker/metadata-action@v4
-      with:
-        images: |
-          quay.io/kubealex/my-app
-        tags: |
-          type=semver,pattern={{version}}
-          # type=semver,pattern={{major}}.{{minor}}
-        flavor: |
-          latest=true
           
     - name: Build Image
       id: build-image
       uses: redhat-actions/buildah-build@v2
       with:
         image: my-app
-        tags: ${{ steps.meta.outputs.tags }}
+        tags: ${{ steps.bump-version.outputs.new_tag || steps.bump-version.outputs.previous_tag }}
         containerfiles: |
           ./Dockerfile
 
@@ -46,16 +35,12 @@ jobs:
       uses: redhat-actions/push-to-registry@v2
       with:
         image: ${{ steps.build-image.outputs.image }}
-        tags: ${{ steps.meta.outputs.tags }}
+        tags: ${{ steps.bump-version.outputs.new_tag || steps.bump-version.outputs.previous_tag }}
         registry: quay.io/kubealex
         username: ${{ secrets.QUAY_USERNAME }}
         password: ${{ secrets.QUAY_TOKEN }}
 
     - name: Print image url
       run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
-
-
-    - name: Print tags url
-      run: echo "TAGS - ${{ steps.meta.outputs.tags }}"
 
       
