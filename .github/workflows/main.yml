@@ -5,10 +5,12 @@ on:
       - main
 
 jobs:
-  build:
-    name: Build and push image
-    runs-on: ubuntu-20.04
-
+  versioning:
+    name: Check and manage versioning
+    runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.bump-version.outputs.new_tag || steps.bump-version.outputs.previous_tag }}
+      
     steps:
     - uses: actions/checkout@v2
 
@@ -18,30 +20,47 @@ jobs:
       with:
         github_token: ${{ secrets.GH_TOKEN }}
         default_bump: false     
+  build_image:
+    needs: versioning
+    name: Build container images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build Image - x86_64
+        id: build-image-x86_64
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: my-app
+          tags: ${{ needs.versioning.outputs.release_tag }}
+          containerfiles: |
+            ./Dockerfile
+
+      - name: Build Image - ARM64
+        id: build-image-arm64
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: my-app
+          tags: ${{ needs.versioning.outputs.release_tag }}-arm64
+          containerfiles: |
+            ./Dockerfile-test
           
-    - name: Build Image
-      id: build-image
-      uses: redhat-actions/buildah-build@v2
-      with:
-        image: my-app
-        tags: ${{ steps.bump-version.outputs.new_tag || steps.bump-version.outputs.previous_tag }}
-        containerfiles: |
-          ./Dockerfile
-          ./Dockerfile-test
-
-    # Podman Login action (https://github.com/redhat-actions/podman-login) also be used to log in,
-    # in which case 'username' and 'password' can be omitted.
-    - name: Push To quay.io
-      id: push-to-quay
-      uses: redhat-actions/push-to-registry@v2
-      with:
-        image: ${{ steps.build-image.outputs.image }}
-        tags: ${{ steps.bump-version.outputs.new_tag || steps.bump-version.outputs.previous_tag }}
-        registry: quay.io/kubealex
-        username: ${{ secrets.QUAY_USERNAME }}
-        password: ${{ secrets.QUAY_TOKEN }}
-
-    - name: Print image url
-      run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
+      - name: Push To quay.io
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image-x86_64.outputs.image }}
+          tags: ${{ needs.versioning.outputs.release_tag }}
+          registry: quay.io/kubealex
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+          
+      - name: Push To quay.io
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image-x86_64.outputs.image }}
+          tags: ${{ needs.versioning.outputs.release_tag }}-arm64
+          registry: quay.io/kubealex
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+ #   - name: Print image url
+ #     run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
 
       
