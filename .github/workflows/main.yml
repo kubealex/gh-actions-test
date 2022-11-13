@@ -65,7 +65,8 @@ jobs:
           registry: quay.io/kubealex
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_TOKEN }}
+          
       - name: Print image url
-        run: echo "Images pushed to: \n${{ steps.push-x86.outputs.registry-paths }}\n${{ steps.push-arm64.outputs.registry-paths }}"
+        run: echo "Images pushed to\n${{ steps.push-x86.outputs.registry-paths }}\n${{ steps.push-arm64.outputs.registry-paths }}"
 
       
