@@ -19,13 +19,15 @@ jobs:
       id: bump-version
       with:
         github_token: ${{ secrets.GH_TOKEN }}
-        default_bump: false     
+        default_bump: false    
+        
   build_image:
     needs: versioning
-    name: Build container images
+    name: Build and push container images
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      
       - name: Build Image - x86_64
         id: build-image-x86_64
         uses: redhat-actions/buildah-build@v2
@@ -42,9 +44,10 @@ jobs:
           image: my-app
           tags: ${{ needs.versioning.outputs.release_tag }}-arm64
           containerfiles: |
-            ./Dockerfile-test
+            ./Dockerfile-arm64
           
       - name: Push To quay.io
+        id: push-x86
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ steps.build-image-x86_64.outputs.image }}
@@ -54,14 +57,15 @@ jobs:
           password: ${{ secrets.QUAY_TOKEN }}
           
       - name: Push To quay.io
+        id: push-arm64
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: ${{ steps.build-image-x86_64.outputs.image }}
+          image: ${{ steps.build-image-arm64.outputs.image }}
           tags: ${{ needs.versioning.outputs.release_tag }}-arm64
           registry: quay.io/kubealex
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_TOKEN }}
- #   - name: Print image url
- #     run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
+      - name: Print image url
+        run: echo "Images pushed to: \n${{ steps.push-x86.outputs.registry-paths }}\n${{ steps.push-arm64.outputs.registry-paths }}"
 
       
