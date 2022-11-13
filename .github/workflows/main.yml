@@ -27,6 +27,7 @@ jobs:
         tags: ${{ steps.bump-version.outputs.new_tag || steps.bump-version.outputs.previous_tag }}
         containerfiles: |
           ./Dockerfile
+          ./Dockerfile-test
 
     # Podman Login action (https://github.com/redhat-actions/podman-login) also be used to log in,
     # in which case 'username' and 'password' can be omitted.
