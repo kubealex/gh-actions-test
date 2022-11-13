@@ -9,6 +9,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Bump version and push tag
+      uses: hennejg/github-tag-action@v4.3.1
+      with:
+        github_token: ${{ secrets.GH_TOKEN }}
+          
     - name: Docker meta
       id: meta
       uses: docker/metadata-action@v4
